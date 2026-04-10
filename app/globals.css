@@ -1,0 +1,81 @@
+@import url("https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+* {
+  font-family: "Montserrat", sans-serif;
+}
+
+h2 {
+  font-family: "Barlow", serif;
+  font-weight: bold;
+  font-style: normal;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-family: "Barlow", serif;
+  font-weight: normal;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 4rem;
+}
+a:hover {
+  color: inherit !important;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.3) !important;
+}
+.barlow {
+  font-family: "Barlow", serif;
+}
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f0f0f0;
+}
+
+main {
+  padding: 100px 20px;
+}
+
+body .ant-btn {
+  border: none;
+  border-radius: 15px !important;
+  height: 50px;
+  padding: 10px 40px;
+  box-shadow: none;
+  transition: all 0.3s ease-in-out;
+  color: #fff !important;
+  min-width: 50px;
+}
+body .ant-btn.ant-btn-variant-outlined {
+  border: 1px solid #000 !important;
+  background-color: white;
+  color: #000 !important;
+}
+body .ant-btn.ant-btn-link {
+  color: #000 !important;
+  padding: 10px 20px !important;
+}
+.ant-btn:hover {
+  box-shadow: rgba(149, 157, 165, 0.8) 0px 8px 24px;
+  transition: all 0.3s ease-in-out;
+}
+body .ant-card {
+  border-radius: 20px;
+  background-color: #fff;
+  margin: 20px;
+  color: #333;
+  padding: 10px;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  transition: all 0.3s ease-in-out;
+}
+.ant-card:hover {
+  box-shadow: rgba(149, 157, 165, 0.4) 0px 8px 24px;
+}
+.ant-tooltip {
+  display: none !important;
+}
