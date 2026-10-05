@@ -1,14 +1,17 @@
+import { getWebSite } from "@/lib/webSite";
 import Mailjet from "node-mailjet";
 
-const mailjetClient = Mailjet.apiConnect(
-  "62e10bb6cbe7ccc023674fcecd107de7",
-  "9530aee91f8d8365e4d3cab688a3f8df",
-);
-
 export async function POST(request) {
-  const { subject, message, email, toEmail } = await request.json();
+  const { subject, message, email } = await request.json();
 
   try {
+    const mailjetClient = Mailjet.apiConnect(
+      process.env.MAILJET_API_KEY,
+      process.env.MAILJET_SECRET_KEY,
+    );
+    const webSite = await getWebSite();
+    const toEmail = webSite?.email;
+
     if (toEmail) {
       const emailData = {
         Messages: [
