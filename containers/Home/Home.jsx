@@ -20,9 +20,13 @@ import {
   faMapMarkerAlt,
   faPhone,
 } from "@fortawesome/free-solid-svg-icons";
+import { useIsGoogleLoaded } from "@/providers/GoogleProvider";
+import Link from "next/link";
+import { minimumServices } from "@/lib/services";
+import { buildLocalPageTitle, buildServicePageHref } from "@/lib/localPages";
 import { faFacebook, faInstagram } from "@fortawesome/free-brands-svg-icons";
 
-const Home = ({ webSite }) => {
+const Home = ({ webSite, currentCity = null, currentService = null }) => {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 1300;
 
   if (!webSite.h1) webSite.h1 = "Titre du site";
@@ -30,26 +34,42 @@ const Home = ({ webSite }) => {
   if (!webSite.googleMapsName) webSite.googleMapsName = "Artilis";
   if (!webSite.address) webSite.address = "Bordeaux, France";
   if (!webSite.aboutDescription) webSite.aboutDescription = "Description";
-  if (!webSite.projectPhotos.length)
-    webSite.projectPhotos = [
-      "https://placehold.co/400x400?text=Photo+1",
-      "https://placehold.co/400x400?text=Photo+2",
-      "https://placehold.co/400x400?text=Photo+3",
-      "https://placehold.co/400x400?text=Photo+4",
-      "https://placehold.co/400x400?text=Photo+5",
-      "https://placehold.co/400x400?text=Photo+6",
-    ];
+  const projectPhotos = webSite.photos?.projects?.length
+    ? webSite.photos.projects
+    : (webSite.projectPhotos ?? []).map((url) => ({ url }));
+  const displayedProjectPhotos = projectPhotos.length
+    ? projectPhotos
+    : [1, 2, 3, 4, 5, 6].map((number) => ({
+        url: `https://placehold.co/400x400?text=Photo+${number}`,
+      }));
+
+  const localPageTitle =
+    currentCity || currentService
+      ? buildLocalPageTitle({ webSite, city: currentCity, service: currentService })
+      : null;
+  const displayedServices = [
+    ...(webSite.services ?? []),
+    ...Array.from(
+      { length: Math.max(0, minimumServices - (webSite.services ?? []).length) },
+      (_, i) => ({
+        title: "Service " + ((webSite.services ?? []).length + i + 1),
+        homeDescription: "Description",
+      }),
+    ),
+  ];
 
   const { TextArea } = Input;
   const [form] = Form.useForm();
   const { message } = App.useApp();
 
+  const isGoogleLoaded = useIsGoogleLoaded();
   const inputRef = useRef(null);
   const [ratingInfos, setRatingInfos] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
+    if (!isGoogleLoaded) return;
     const service = new google.maps.places.PlacesService(inputRef.current);
     service.findPlaceFromQuery(
       {
@@ -80,7 +100,7 @@ const Home = ({ webSite }) => {
         }
       },
     );
-  }, []);
+  }, [isGoogleLoaded]);
 
   const handleSendEmail = async () => {
     try {
@@ -128,7 +148,7 @@ const Home = ({ webSite }) => {
         }}
       />
       <div className="banner-inner">
-        <h1>{webSite.h1}</h1>
+        <h1>{localPageTitle || webSite.h1}</h1>
         <Button onClick={() => setIsModalVisible(true)}>
           Demander un devis
         </Button>
@@ -227,27 +247,63 @@ const Home = ({ webSite }) => {
       <div className="services" id="services">
         <h2>{webSite.servicesTitle || "Services"}</h2>
         <Flex justify="space-around" wrap>
-          {[
-            {
-              title: webSite.service1Title || "Service 1",
-              description: webSite.service1Desc || "Description",
-            },
-            {
-              title: webSite.service2Title || "Service 2",
-              description: webSite.service2Desc || "Description",
-            },
-            {
-              title: webSite.service3Title || "Service 3",
-              description: webSite.service3Desc || "Description",
-            },
-          ].map((service, i) => (
-            <Flex key={i}>
-              <h3>{service.title}</h3>
-              <p>{service.description}</p>
-            </Flex>
-          ))}
+          {displayedServices.map((service, i) => {
+            const servicePhoto = service.photos?.[0];
+            const card = (
+              <Flex
+                key={service.slug ?? i}
+                className={servicePhoto ? "has-photo" : undefined}
+              >
+                {servicePhoto ? (
+                  <img src={servicePhoto.url} alt={servicePhoto.alt || service.title} />
+                ) : null}
+                <h3>{service.title}</h3>
+                {service.homeDescription ? <p>{service.homeDescription}</p> : null}
+              </Flex>
+            );
+            return service.slug ? (
+              <Link
+                key={service.slug}
+                href={buildServicePageHref(webSite, service)}
+                style={{ display: "contents" }}
+              >
+                {card}
+              </Link>
+            ) : (
+              card
+            );
+          })}
         </Flex>
       </div>
+      {localPageTitle ? (
+        <div className="a-propos" id="page-locale">
+          <h2>{localPageTitle}</h2>
+          {currentCity?.description
+            ? currentCity.description
+                .split("\n")
+                .map((line, i) => <p key={i}>{line}</p>)
+            : null}
+          {currentService?.pageDescription ? (
+            <div
+              dangerouslySetInnerHTML={{ __html: currentService.pageDescription }}
+            />
+          ) : null}
+          {currentService?.photos?.length ? (
+            <AntdImage.PreviewGroup>
+              <Flex wrap gap={10} justify="center">
+                {currentService.photos.map((servicePhoto, i) => (
+                  <AntdImage
+                    key={servicePhoto.url}
+                    src={servicePhoto.url}
+                    alt={servicePhoto.alt || currentService.title + " " + (i + 1)}
+                    width={300}
+                  />
+                ))}
+              </Flex>
+            </AntdImage.PreviewGroup>
+          ) : null}
+        </div>
+      ) : null}
       <div className="a-propos" id="a-propos">
         {webSite.aboutPhoto ? (
           <img src={webSite.aboutPhoto} alt="a propos" />
@@ -261,9 +317,12 @@ const Home = ({ webSite }) => {
         <h2>{webSite.projectsTitle || "Réalisations"}</h2>
         <AntdImage.PreviewGroup>
           <Carousel slidesToShow={isMobile ? 1 : 3} arrows infinite={false}>
-            {webSite.projectPhotos.map((e, i) => (
+            {displayedProjectPhotos.map((projectPhoto, i) => (
               <div key={i}>
-                <AntdImage src={e} alt={"Réalisations " + (i + 1)} />
+                <AntdImage
+                  src={projectPhoto.url}
+                  alt={projectPhoto.alt || "Réalisations " + (i + 1)}
+                />
               </div>
             ))}
           </Carousel>
@@ -431,22 +490,24 @@ const Home = ({ webSite }) => {
         </Flex>
       </Flex>
       <div className="map" id="localisation">
-        <GoogleMap
-          mapContainerStyle={{
-            width: "100%",
-            height: "600px",
-          }}
-          center={coordinates}
-          zoom={10}
-          options={{
-            zoomControl: true,
-            tilt: 0,
-            gestureHandling: "auto",
-            mapTypeId: "roadmap",
-          }}
-        >
-          {coordinates && <Marker position={coordinates} />}
-        </GoogleMap>
+        {isGoogleLoaded && (
+          <GoogleMap
+            mapContainerStyle={{
+              width: "100%",
+              height: "600px",
+            }}
+            center={coordinates}
+            zoom={10}
+            options={{
+              zoomControl: true,
+              tilt: 0,
+              gestureHandling: "auto",
+              mapTypeId: "roadmap",
+            }}
+          >
+            {coordinates && <Marker position={coordinates} />}
+          </GoogleMap>
+        )}
       </div>
     </HomeWrapper>
   );

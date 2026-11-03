@@ -112,6 +112,17 @@ export const HomeWrapper = styled.div`
           width: 100%;
           height: 100%;
         }
+        &.has-photo::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: 20px;
+          background: rgba(0, 0, 0, 0.45);
+        }
+        &.has-photo h3,
+        &.has-photo p {
+          color: white;
+        }
         h3,
         p {
           z-index: 2;

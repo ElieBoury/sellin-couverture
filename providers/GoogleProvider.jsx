@@ -1,22 +1,26 @@
 "use client";
 
+import { createContext, useContext } from "react";
 import { useJsApiLoader } from "@react-google-maps/api";
-import { Spin } from "antd";
 
 const libraries = ["places", "drawing", "geometry"];
 
+const GoogleLoadedContext = createContext(false);
+
+export const useIsGoogleLoaded = () => useContext(GoogleLoadedContext);
+
 const GoogleProvider = ({ children }) => {
-  const { isLoaded: scriptLoaded, loadError } = useJsApiLoader({
+  const { isLoaded: scriptLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyDjQDvqNwowt2108udIQqat__nuE0W2AaA",
     libraries: libraries,
     language: "fr",
   });
 
-  if (loadError) return <p>Encountered error while loading google maps</p>;
-
-  if (!scriptLoaded) return <Spin />;
-
-  return children;
+  return (
+    <GoogleLoadedContext.Provider value={scriptLoaded}>
+      {children}
+    </GoogleLoadedContext.Provider>
+  );
 };
 
 export default GoogleProvider;

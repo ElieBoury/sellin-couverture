@@ -1,4 +1,4 @@
-import "./globals.css";
+import "@/app/globals.css";
 import StyledComponentsRegistry from "@/lib/registry";
 import { App, ConfigProvider, Layout } from "antd";
 import frFR from "antd/locale/fr_FR";
@@ -11,47 +11,7 @@ import { Content } from "antd/lib/layout/layout";
 import GoogleProvider from "@/providers/GoogleProvider";
 config.autoAddCss = false;
 
-export async function generateMetadata({ params, searchParams }, parent) {
-  const webSite = await (
-    await fetch(
-      (process.env.NODE_ENV !== "production"
-        ? "http://localhost:3002"
-        : "https://artilis.fr") +
-        "/api/websites?website=" +
-        process.env.WEBSITE_ID
-    )
-  ).json();
-
-  return {
-    title: webSite.metaTitle,
-    description: webSite.metaDescription,
-    authors: [{ name: "Artilis", url: "https://artilis.fr" }],
-    creator: "Artilis",
-    openGraph: {
-      images: [webSite.logo, webSite.bannerPhoto],
-      title: webSite.metaTitle,
-      description: webSite.metaDescription,
-      url: "https://artilis.fr",
-      siteName: webSite.companyName,
-      locale: "fr_FR",
-      type: "website",
-    },
-  };
-}
-
-export default async function RootLayout({ children }) {
-  const webSite = await (
-    await fetch(
-      (process.env.NODE_ENV !== "production"
-        ? "http://localhost:3002"
-        : "https://artilis.fr") +
-        "/api/websites?website=" +
-        process.env.WEBSITE_ID
-    )
-  ).json();
-
-  console.log(webSite);
-
+export default function SiteShell({ webSite, children }) {
   return (
     <html lang="fr">
       <body>
