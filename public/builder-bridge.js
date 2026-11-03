@@ -25,8 +25,22 @@
     );
   }
 
+  function readParentOrigin() {
+    try {
+      return new URL(document.referrer).origin;
+    } catch (error) {
+      return null;
+    }
+  }
+
   function post(message) {
-    window.parent.postMessage(Object.assign({ source: "artilis-builder-bridge" }, message), "*");
+    var payload = Object.assign({ source: "artilis-builder-bridge" }, message);
+    var parentOrigin = readParentOrigin();
+    var targetOrigins =
+      parentOrigin && isAllowedOrigin(parentOrigin) ? [parentOrigin] : allowedParentOrigins;
+    targetOrigins.forEach(function (targetOrigin) {
+      window.parent.postMessage(payload, targetOrigin);
+    });
   }
 
   function injectStyle() {
