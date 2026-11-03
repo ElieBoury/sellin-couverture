@@ -81,7 +81,8 @@ export const HomeWrapper = styled.div`
     max-width: 1200px;
     > div {
       width: 100%;
-      > div {
+      > div,
+      > a > div {
         position: relative;
         flex: 0 0 31%;
         margin: 10px;
@@ -309,7 +310,8 @@ export const HomeWrapper = styled.div`
         top: 0px !important;
         margin-bottom: 20px;
       }
-      > div > div {
+      > div > div,
+      > div > a > div {
         min-height: 300px;
       }
     }
